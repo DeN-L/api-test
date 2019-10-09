@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="list-all"></div>
+<article id="article-single"></article>
+
+<script src="vendor/bower-asset/jquery/dist/jquery.min.js"></script>
+<script>
+    function api_connect(k_article) {
+        $.ajax({
+            url: 'api_connect.php',
+            type: 'POST',
+            data:{
+                k_article: k_article
+            },
+            success: function (s_response) {
+                if(k_article) {
+                    let a_article = JSON.parse(s_response);
+                    const jq_title = $('<h2>', {
+                        text: a_article.title
+                    });
+                    const jq_section = $('<section>', {
+                        text: a_article.text,
+                    });
+                    const jq_article = jq_title.add(jq_section);
+                    $('#article-single').html(jq_article);
+                } else {
+                    let a_response = JSON.parse(s_response);
+                    const jq_list_all = $('#list-all');
+                    $.each(a_response, function (i, o_article) {
+                        // Генрация тега с атрибутами.
+                        const jq_link = $('<a>', {
+                            class: 'article-link',
+                            text: o_article.title,
+                            href: '#',
+                            'data-id': o_article.id
+                        });
+                        // Добавление в конец родительского блока.
+                        jq_link.appendTo(jq_list_all);
+                        jq_list_all.append('<br>');
+                    });
+
+                    // Навешивает событие на все добавленные ссылки.
+                    $('.article-link').on('click', function (e) {
+                        e.preventDefault();
+                        api_connect($(this).data('id'));
+                    });
+                }
+            }
+        });
+    }
+
+    // Без аргумента k_article отображает список статей.
+    api_connect();
+
+</script>
+</body>
+</html>
